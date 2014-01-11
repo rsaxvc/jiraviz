@@ -1,3 +1,4 @@
+#!/usr/bin/python
 #get all the arguments with argparse
 import argparse
 	#output image type
