@@ -18,7 +18,7 @@ class JiraAPI:
 			return self.key
 
 	"""implements a connection to a JIRA server"""
-	def __init__(self, url ):
+	def __init__(self, url, username, password ):
 		self.url = url
 
 		#here be dummy data

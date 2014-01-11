@@ -12,12 +12,14 @@ import argparse
 
 api_url = "jira.atlassian.com"
 entry_point = "JRA"
+username = None
+password = None
 
 #get all the data with JiraWalk
 from jirawalk import JiraWalk
 
 #start with project or user-selected issue
-j = JiraWalk(api_url, entry_point)
+j = JiraWalk(api_url, entry_point, username, password)
 
 #graph the graph with graphviz
 import pydot	

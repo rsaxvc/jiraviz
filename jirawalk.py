@@ -36,13 +36,13 @@ class JiraWalk:
 		self.done.update( thispass )
 		return len(self.todo) == 0
 
-	def __init__(self, apiserver, entryPoint ):
+	def __init__(self, apiserver, entryPoint, username, password ):
 		self.nodes = list()
 		self.edges = list()
 
 		self.todo = dict()
 		self.done = dict()
-		self.j = JiraAPI(apiserver)
+		self.j = JiraAPI(apiserver, username, password)
 
 		if( entryPoint.find('-') != -1 ):
 			issues = [ self.j.fetchIssue(entryPoint) ]

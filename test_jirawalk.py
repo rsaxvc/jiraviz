@@ -1,7 +1,7 @@
 from  jirawalk import JiraWalk
 
 print "Test:Walking project:JRA"
-j = JiraWalk("jira.atlassian.com", "JRA")
+j = JiraWalk("https://jira.atlassian.com", "JRA", None, None)
 
 print "","Printing nodes"
 for node in j.nodes:
@@ -13,7 +13,7 @@ for edge in j.edges:
 
 
 print "Test:Walking issues starting with:JRA-A"
-j = JiraWalk("jira.atlassian.com", "JRA-A")
+j = JiraWalk("https://jira.atlassian.com", "JRA-A", None, None)
 
 print "","Printing nodes"
 for node in j.nodes:

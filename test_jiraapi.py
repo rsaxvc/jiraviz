@@ -1,6 +1,6 @@
 from  jiraapi import JiraAPI
 
-j = JiraAPI("jira.atlassian.com")
+j = JiraAPI("https://jira.atlassian.com", None, None )
 jissues = j.fetchIssuesFromProject("JRA")
 
 print "Listing issues:"
