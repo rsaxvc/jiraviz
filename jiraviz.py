@@ -20,18 +20,15 @@ import pydot
 graph = pydot.Dot(graph_type='digraph')
 
 #add all the nodes
-nodes = list()
+nodes = dict()
 for issue in j.nodes:
-	nodes.append( pydot.Node(str(issue), style="filled" ) )
+	issuename = str(issue)
+	nodes[issuename] = pydot.Node(issuename, style="filled" )
+	graph.add_node(nodes[issuename])
 	print issue
 
-for node in nodes:
-	graph.add_node(node)
-
 #add all the edges
-#until we have actual edge data, just hook them all together
-for node in nodes:
-	for othernode in nodes:
-		graph.add_edge(pydot.Edge(node, othernode ) )
+for edge in j.edges:
+	graph.add_edge( pydot.Edge(nodes[edge.tail], nodes[edge.head]) )
 
 graph.write_png('example2_graph.png')
