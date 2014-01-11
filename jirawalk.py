@@ -25,12 +25,13 @@ class JiraWalk:
 
 				if( link.type == "is blocked by" ):
 					e = self.Edge( link.key, i.key )
-					if( e not in self.edges ):
-						self.edges.append( e )
 				elif( link.type == "blocking" ):
 					e = self.Edge( i.key, link.key )
-					if( e not in self.edges ):
-						self.edges.append( e )
+				else:
+					continue
+
+				if( e not in self.edges ):
+					self.edges.append( e )
 
 		self.done = self.done + thispass
 
