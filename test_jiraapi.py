@@ -5,9 +5,14 @@ jissues = j.fetchIssuesFromProject("JRA")
 
 print "Listing issues:"
 for issue in jissues:
-	print "",issue
+	i = j.fetchIssue(issue.key)
+	print "",i
+	for l in i.links:
+		print "","",l
 
 print "Fetching issues individually:"
 for issue in jissues:
 	i = j.fetchIssue(issue.key)
 	print "",i
+	for l in i.links:
+		print "","",l
