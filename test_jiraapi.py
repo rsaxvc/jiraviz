@@ -1,5 +1,9 @@
 from  jiraapi import JiraAPI
 
 j = JiraAPI("jira.atlassian.com")
-j.fetchIssuesFromProject("JRA")
+jissues = j.fetchIssuesFromProject("JRA")
+
+for issue in jissues:
+	print issue
+
 j.fetchIssue("JRA-9")

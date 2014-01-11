@@ -9,8 +9,16 @@ import argparse
 	#output-filename?
 
 #get all the data with jiraapi
-import jiraapi
-	#list of issues in project or user-selected issue
+from  jiraapi import JiraAPI
+
+#list of issues in project or user-selected issue
+j = JiraAPI("jira.atlassian.com")
+if( 0 ):
+	#implement user-selected issues here
+	jissues = j.fetchIssue("JRA-9")
+else:
+	jissues = j.fetchIssuesFromProject("JRA")
+
 	#download entire graph
 		#create a map of all isues we know about
 		#For each link we don't have
@@ -23,26 +31,18 @@ import pydot
 graph = pydot.Dot(graph_type='digraph')
 
 #add all the nodes
-node_a = pydot.Node("JRA-1.thing1", style="filled", fillcolor="red")
-node_b = pydot.Node("JRA-2.thing2", style="filled", fillcolor="green")
-node_c = pydot.Node("JRA-3.thing3", style="filled", fillcolor="blue")
+nodes = list()
+for issue in jissues:
+	nodes.append( pydot.Node(str(issue), style="filled" ) )
+	print issue
 
-node_d = pydot.Node("JRA-4.thing4", style="filled", fillcolor="red")
-node_e = pydot.Node("JRA-5.thing5", style="filled", fillcolor="green")
-
-graph.add_node(node_a)
-graph.add_node(node_b)
-graph.add_node(node_c)
-
-graph.add_node(node_d)
-graph.add_node(node_e)
+for node in nodes:
+	graph.add_node(node)
 
 #add all the edges
-graph.add_edge(pydot.Edge(node_a, node_b))
-graph.add_edge(pydot.Edge(node_b, node_c))
-
-graph.add_edge(pydot.Edge(node_d, node_e))
-graph.add_edge(pydot.Edge(node_a, node_e))
-graph.add_edge(pydot.Edge(node_c, node_e))
+#until we have actual edge data, just hook them all together
+for node in nodes:
+	for othernode in nodes:
+		graph.add_edge(pydot.Edge(node, othernode ) )
 
 graph.write_png('example2_graph.png')
