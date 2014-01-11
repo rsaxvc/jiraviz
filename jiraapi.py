@@ -30,4 +30,5 @@ class JiraAPI:
 
 	def fetchIssue( self, issuename ):
 		"""given an issue name(ISSUE-n), returns that issue"""
-		pass
+		#mockup
+		return self.JiraIssueType( issuename, list() )
