@@ -2,15 +2,19 @@ class JiraAPI:
 	import json
 
 	class JiraLinkType:
+		def __new__( self, linktype, linkissue ):
+			self.type=linktype
+			self.issue=linkissue
 		pass
 
 	class JiraIssueType:
-		#has list of JiraLinkTypes
+		def  __new__( self, issuekey, issuelinks ):
+			self.key = issuekey
+			self.links = issuelinks
 		pass
 
-	def fetchIssuesFromProject():
+	def fetchIssuesFromProject( self, projectname ):
 		pass
-	def fetchIssue():
+	def fetchIssue( self, issuename ):
 		pass
 	pass
-
