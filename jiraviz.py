@@ -9,8 +9,9 @@ import argparse
 	#colors?
 	#output-filename?
 	#output-resolution?
+	#max-fetch-glob - in case of angry jira server admin
 
-api_url = "jira.atlassian.com"
+api_url = "http://jira.atlassian.com"
 entry_point = "JRA"
 username = None
 password = None
