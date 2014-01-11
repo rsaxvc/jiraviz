@@ -1,3 +1,4 @@
+#!/usr/bin/python
 from  jiraapi import JiraAPI
 
 j = JiraAPI("https://jira.atlassian.com", None, None )

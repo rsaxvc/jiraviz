@@ -1,3 +1,4 @@
+#!/usr/bin/python
 from  jirawalk import JiraWalk
 
 print "Test:Walking project:JRA"
