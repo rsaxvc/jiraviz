@@ -15,49 +15,50 @@ class JiraWalk:
 		done = True
 
 		thispass = self.todo
-		self.todo = list()
+		self.todo = dict()
 
-		for node in thispass:
-			i = self.j.fetchIssue( node )
-			for link in i.links:
+		for nodekey in thispass:
+			node = thispass[nodekey]
+			for link in node.links:
 				if( link.key not in self.todo and link.key not in self.done and link.key not in thispass ):
-					self.todo.append( link.key )
+					self.todo[link.key]=self.j.fetchIssue( link.key )
 
 				if( link.type == "is blocked by" ):
-					e = self.Edge( link.key, i.key )
+					e = self.Edge( link.key, node.key )
 				elif( link.type == "blocking" ):
-					e = self.Edge( i.key, link.key )
+					e = self.Edge( node.key, link.key )
 				else:
 					continue
 
 				if( e not in self.edges ):
 					self.edges.append( e )
 
-		self.done = self.done + thispass
-
+		self.done = dict(self.done.items() + thispass.items())
 		return len(self.todo) == 0
 
 	def __init__(self, apiserver, entryPoint ):
 		self.nodes = list()
 		self.edges = list()
 
-		self.todo = list()
-		self.done = list()
+		self.todo = dict()
+		self.done = dict()
 		self.j = JiraAPI(apiserver)
 
 		if( entryPoint.find('-') != -1 ):
-			issue = self.j.fetchIssue(entryPoint)
-			self.todo.append( issue.key )
+			issues = [ self.j.fetchIssue(entryPoint) ]
 		else:
 			issues = self.j.fetchIssuesFromProject(entryPoint)
-			for issue in issues:
-				self.todo.append( issue.key )
+
+		for issue in issues:
+			self.todo[issue.key] = issue
 
 		while( not self.expand() ):
 			pass
 
 		#compact data for API caller and destroy temporaries
-		self.nodes = self.done
+		for nodekey in self.done:
+			node = self.done[nodekey]
+			self.nodes.append(node.key)
 		del self.done
 		del self.todo
 		del self.j
