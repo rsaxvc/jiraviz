@@ -7,6 +7,7 @@ import argparse
 	#optional-goal-issue
 	#colors?
 	#output-filename?
+	#output-resolution?
 
 #get all the data with JiraWalk
 from  jirawalk import JiraWalk
