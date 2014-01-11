@@ -33,7 +33,7 @@ class JiraWalk:
 				if( e not in self.edges ):
 					self.edges.append( e )
 
-		self.done = dict(self.done.items() + thispass.items())
+		self.done.update( thispass )
 		return len(self.todo) == 0
 
 	def __init__(self, apiserver, entryPoint ):
