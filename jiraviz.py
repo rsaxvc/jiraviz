@@ -1,5 +1,6 @@
 #get all the arguments with argparse
 import argparse
+	#output image type
 	#API url
 	#jira-project or jira-issue
 	#username?
@@ -35,4 +36,4 @@ for issue in j.nodes:
 for edge in j.edges:
 	graph.add_edge( pydot.Edge(nodes[edge.tail], nodes[edge.head]) )
 
-graph.write_png(entry_point + '.png')
+graph.write_svg(entry_point + '.svg')
