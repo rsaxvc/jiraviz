@@ -1,7 +1,7 @@
 #get all the arguments with argparse
 import argparse
 	#API url
-	#jira-project
+	#jira-project or jira-issue
 	#username?
 	#password?
 	#optional-goal-issue
@@ -9,11 +9,14 @@ import argparse
 	#output-filename?
 	#output-resolution?
 
+api_url = "jira.atlassian.com"
+entry_point = "JRA"
+
 #get all the data with JiraWalk
-from  jirawalk import JiraWalk
+from jirawalk import JiraWalk
 
 #start with project or user-selected issue
-j = JiraWalk("jira.atlassian.com", "JRA")
+j = JiraWalk(api_url, entry_point)
 
 #graph the graph with graphviz
 import pydot	
@@ -32,4 +35,4 @@ for issue in j.nodes:
 for edge in j.edges:
 	graph.add_edge( pydot.Edge(nodes[edge.tail], nodes[edge.head]) )
 
-graph.write_png('example2_graph.png')
+graph.write_png(entry_point + '.png')
