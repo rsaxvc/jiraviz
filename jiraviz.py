@@ -26,7 +26,7 @@ j = JiraWalk(api_url, entry_point, username, password)
 #graph the graph with graphviz
 import pydot	
 # specify a directed-graph
-graph = pydot.Dot(graph_type='digraph')
+graph = pydot.Dot(graph_type='digraph',rankdir='LR')
 
 #add all the nodes
 nodes = dict()
