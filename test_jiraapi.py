@@ -1,22 +1,32 @@
 #!/usr/bin/python
 from  jiraapi import JiraAPI
 
-j = JiraAPI("https://jira.atlassian.com", None, None )
 
-w9 = j.fetchIssue("WBS-9")
-print "WBS-9:",w9
+#test config
+j = JiraAPI("https://jira.atlassian.com", None, None ) #set up connection
+issuename="WBS-9" #a single issue to test
+projectname="WBS" #a project to iterate
 
-jissues = j.fetchIssuesFromProject("WBS")
+print "Test:Fetching",issuename
+i = j.fetchIssue(issuename)
+if( i.key == issuename ):
+	print "",i.key
+else:
+	print "","Key Mismatch!", i.key, "vs", issuename
 
-print "Listing issues:"
+print "Test:Enumerate issues from",projectname
+jissues = j.fetchIssuesFromProject(projectname)
 for issue in jissues:
-	print issue
 	i = j.fetchIssue(issue.key)
-	print "",i
+	if( issue.key == i.key ):
+		print "",i
+	else:
+		print "","Key Mismatch!", issue.key, "vs", i.key
+
 	for l in i.links:
 		print "","",l
 
-print "Fetching issues individually:"
+print "Test:Fetching enumerated issues individually from",projectname
 for issue in jissues:
 	i = j.fetchIssue(issue.key)
 	print "",i
