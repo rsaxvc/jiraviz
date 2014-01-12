@@ -3,20 +3,20 @@ import json
 
 class JiraAPI:
 	"""implements a connection to a JIRA server. Private functions start with _"""
-	class JiraLinkType:
+	class IssueLink:
 		"""connects this issue to another"""
-		def __init__( self, linktype, linkissue ):
-			self.type=linktype
-			self.key=linkissue
+		def __init__( self, type, key ):
+			self.type=type
+			self.key=key
 
 		def __str__( self ):
 			return self.type + " " + self.key
 
-	class JiraIssueType:
+	class Issue:
 		"""represents a single JIRA issue"""
-		def __init__( self, issuekey, issuelinks ):
-			self.key = issuekey
-			self.links = issuelinks
+		def __init__( self, key, links ):
+			self.key = key
+			self.links = links
 
 		def __str__( self ):
 			return self.key
@@ -37,17 +37,17 @@ class JiraAPI:
 		return r
 
 	def _packIssue( self, jissue ):
-		"""pack a JSON issue to a JiraIssueType"""
+		"""pack a JSON issue to an Issue"""
 		jfields = jissue['fields']
 		jlinks = jfields['issuelinks']
 		links = list()		
 		for jlink in jlinks:
 			if( jlink['type']['name'] == 'Blocker' ):
 				if 'outwardIssue' in jlink:
-					links.append( self.JiraLinkType("blocking",jlink['outwardIssue']['key'] ) )
+					links.append( self.IssueLink("blocking",jlink['outwardIssue']['key'] ) )
 				elif 'inwardIssue' in jlink:
-					links.append( self.JiraLinkType("is blocked by",jlink['inwardIssue']['key'] ) )
-		return self.JiraIssueType( jissue['key'], links )
+					links.append( self.IssueLink("is blocked by",jlink['inwardIssue']['key'] ) )
+		return self.Issue( jissue['key'], links )
 
 	def _fetchIssueCountFromProject( self, projectname ):
 		"""given a project name, returns number of issues in project"""
