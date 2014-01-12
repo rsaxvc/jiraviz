@@ -10,7 +10,7 @@ projectname="WBS" #a project to iterate
 print "Test:Fetching",issuename
 i = j.fetchIssue(issuename)
 if( i.key == issuename ):
-	print "",i.key
+	print "",i
 else:
 	print "","Key Mismatch!", i.key, "vs", issuename
 

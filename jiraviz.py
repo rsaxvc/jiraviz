@@ -31,9 +31,8 @@ graph = pydot.Dot(graph_type='digraph')
 #add all the nodes
 nodes = dict()
 for issue in j.nodes:
-	issuename = str(issue)
-	nodes[issuename] = pydot.Node(issuename, style="filled" )
-	graph.add_node(nodes[issuename])
+	nodes[issue.key] = pydot.Node(issue.summary, style="filled" )
+	graph.add_node(nodes[issue.key])
 	print issue
 
 #add all the edges

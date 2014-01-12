@@ -61,7 +61,8 @@ class JiraWalk:
 		#compact data for API caller and destroy temporaries
 		for nodekey in self.done:
 			node = self.done[nodekey]
-			self.nodes.append(node.key)
+			del node.links
+			self.nodes.append(node)
 		del self.done
 		del self.todo
 		del self.j
