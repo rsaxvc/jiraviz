@@ -7,6 +7,9 @@ class JiraWalk:
 			self.head = blocked_by
 			self.tail = blocked
 
+		def __eq__( self, other ):
+			return self.head == other.head and self.tail == other.tail
+
 		def __str__( self ):
 			return self.head + " is blocked by " + self.tail
 
