@@ -1,4 +1,5 @@
 #!/usr/bin/python
+
 #get all the arguments with argparse
 import argparse
 	#output image type
@@ -13,7 +14,7 @@ import argparse
 	#max-fetch-glob - in case of angry jira server admin
 
 api_url = "http://jira.atlassian.com"
-entry_point = "CWD-3051"
+entry_point = "CWD-3051,WBS-4"
 username = None
 password = None
 

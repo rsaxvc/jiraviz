@@ -39,7 +39,7 @@ class JiraWalk:
 		self.done.update( thispass )
 		return len(self.todo) == 0
 
-	def __init__(self, apiserver, entryPoint, username, password ):
+	def __init__(self, apiserver, entryPoints, username, password ):
 		self.nodes = list()
 		self.edges = list()
 
@@ -47,14 +47,18 @@ class JiraWalk:
 		self.done = dict()
 		self.j = JiraAPI(apiserver, username, password)
 
-		if( entryPoint.find('-') != -1 ):
-			issues = [ self.j.fetchIssue(entryPoint) ]
-		else:
-			issues = self.j.fetchIssuesFromProject(entryPoint)
+		issues = list()
+		for entryPoint in entryPoints.split(','):
+			if( entryPoint.find('-') != -1 ):
+				issues.append( self.j.fetchIssue(entryPoint) )
+			else:
+				issues = issues + self.j.fetchIssuesFromProject(entryPoint)
 
-		for issue in issues:
-			self.todo[issue.key] = issue
+			for issue in issues:
+				self.todo[issue.key] = issue
 
+		#each execution of this loop will expand
+		#the graph by one edge in all directions
 		while( not self.expand() ):
 			pass
 
