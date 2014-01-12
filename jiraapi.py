@@ -94,7 +94,7 @@ class JiraAPI:
 		projectquery = self.baseurl + "/rest/api/latest/issue/" + issuename + "?expand=links"
 		r = self._runQuery(projectquery)
 		if( r.status_code < 200 or r.status_code > 299 ):
-			print "Warning:Unable to retrieve data for",projectname
+			print "Warning:Unable to retrieve data for",issuename
 		elif( not r.headers['content-type'].startswith('application/json') ):
 			print "Warning:Wrong application type fetched:",r.headers['content-type']
 		else:
