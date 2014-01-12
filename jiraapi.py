@@ -1,4 +1,8 @@
+import requests
+import json
+
 class JiraAPI:
+	"""implements a connection to a JIRA server. Private functions start with _"""
 	class JiraLinkType:
 		"""connects this issue to another"""
 		def __init__( self, linktype, linkissue ):
@@ -17,53 +21,83 @@ class JiraAPI:
 		def __str__( self ):
 			return self.key
 
-	"""implements a connection to a JIRA server"""
-	def __init__(self, url, username, password ):
-		self.url = url
+	def __init__(self, baseurl, username, password ):
+		self.baseurl = baseurl
+		self.username = username
+		self.password = password
+		self.ara_throttle = 20 #angry Ron avoider
 
-		#here be dummy data
-		self.issues = list()
+	def _runQuery( self, queryurl ):
+		"""fetch/execute a query, managing basic-auth as needed"""
+		#print "Querying ",queryurl
+		if self.username == None or self.password == None:
+			r = requests.get(queryurl)
+		else:
+			r = requests.get(queryurl, auth=(self.username, self.password) )
+		return r
 
-		#some independent issues
-		self.issues.append( self.JiraIssueType( "JRA-1", list() ) )
-		self.issues.append( self.JiraIssueType( "JRA-2", list() ) )
-		self.issues.append( self.JiraIssueType( "JRA-3", list() ) )
+	def _packIssue( self, jissue ):
+		"""pack a JSON issue to a JiraIssueType"""
+		jfields = jissue['fields']
+		jlinks = jfields['issuelinks']
+		links = list()		
+		for jlink in jlinks:
+			if( jlink['type']['name'] == 'Blocker' ):
+				if 'outwardIssue' in jlink:
+					links.append( self.JiraLinkType("blocking",jlink['outwardIssue']['key'] ) )
+				elif 'inwardIssue' in jlink:
+					links.append( self.JiraLinkType("is blocked by",jlink['inwardIssue']['key'] ) )
+		return self.JiraIssueType( jissue['key'], links )
 
-		blocking_A = self.JiraLinkType( "is blocking", "JRA-A" )
-		blocking_B = self.JiraLinkType( "is blocking", "JRA-B" )
-		blocking_C = self.JiraLinkType( "is blocking", "JRA-C" )
-		blocking_D = self.JiraLinkType( "is blocking", "JRA-D" )
-		blocking_E = self.JiraLinkType( "is blocking", "JRA-E" )
-		blocking_F = self.JiraLinkType( "is blocking", "JRA-F" )
-		blocking_Z = self.JiraLinkType( "is blocking", "JRA-Z" )
-		blocked_by_A = self.JiraLinkType( "is blocked by", "JRA-A" )
-		blocked_by_B = self.JiraLinkType( "is blocked by", "JRA-B" )
-		blocked_by_C = self.JiraLinkType( "is blocked by", "JRA-C" )
-		blocked_by_D = self.JiraLinkType( "is blocked by", "JRA-D" )
-		blocked_by_E = self.JiraLinkType( "is blocked by", "JRA-E" )
-		blocked_by_F = self.JiraLinkType( "is blocked by", "JRA-F" )
+	def _fetchIssueCountFromProject( self, projectname ):
+		"""given a project name, returns number of issues in project"""
+		projectquery = self.baseurl + "/rest/api/latest/search?jql=project=" + projectname + "&maxResults=0";
+		r = self._runQuery(projectquery)
+		if( r.status_code < 200 or r.status_code > 299 ):
+			print "Warning:Unable to retrieve data for",projectname
+		elif( not r.headers['content-type'].startswith('application/json') ):
+			print "Warning:Wrong application type fetched:",r.headers['content-type']
+		else:
+			j = json.loads(r.text)
+			return j['total']
+		return 0
 
-		self.issues.append( self.JiraIssueType( "JRA-A", [blocking_Z, blocked_by_B, blocked_by_C, blocked_by_F] ) )
-		self.issues.append( self.JiraIssueType( "JRA-B", [blocking_Z, blocking_A, blocking_D] ) )
-		self.issues.append( self.JiraIssueType( "JRA-C", [blocking_Z, blocking_A] ) )
-		self.issues.append( self.JiraIssueType( "JRA-D", [blocked_by_B, blocking_E] ) )
-		self.issues.append( self.JiraIssueType( "JRA-E", [blocked_by_D, blocking_F] ) )
-		self.issues.append( self.JiraIssueType( "JRA-F", [blocking_A, blocked_by_E] ) )
-
-		self.issues.append( self.JiraIssueType( "JRA-Z", [blocked_by_A,blocked_by_B,blocked_by_C] ) )
-
-	import json
+	def _fetchSomeIssuesFromProject( self, projectname, min, max ):
+		"""given a project name, returns some of the issues from that project"""
+		issues = list()
+		projectquery = self.baseurl + "/rest/api/latest/search?jql=project=" + projectname + "&maxResults=" + str( max-min ) + "&startAt=" + str(min)
+		r = self._runQuery( projectquery )
+		if( r.status_code < 200 or r.status_code > 299 ):
+			print "Warning:Unable to retrieve data for",projectname
+		elif( not r.headers['content-type'].startswith('application/json') ):
+			print "Warning:Wrong application type fetched:",r.headers['content-type']
+		else:
+			j = json.loads( r.text )
+			jissues = j['issues']
+			for jissue in jissues:
+				issues.append( self._packIssue( jissue ) )
+		return issues
 
 	def fetchIssuesFromProject( self, projectname ):
 		"""given a project name, returns a list of issues in that project"""
-		#mockup
-		return self.issues
+		issuecount = self._fetchIssueCountFromProject( projectname )
+		issues = list()
+		start = 0
+		while( start < issuecount ):
+			end = start + self.ara_throttle
+			issues += self._fetchSomeIssuesFromProject( projectname, start, end )
+			start = start + self.ara_throttle
+		return issues
 
 	def fetchIssue( self, issuename ):
 		"""given an issue name(ISSUE-n), returns that issue"""
-		#mockup
-		links = list()
-		for issue in self.issues:
-			if( issue.key == issuename ):
-				return issue
+		projectquery = self.baseurl + "/rest/api/latest/issue/" + issuename + "?expand=links"
+		r = self._runQuery(projectquery)
+		if( r.status_code < 200 or r.status_code > 299 ):
+			print "Warning:Unable to retrieve data for",projectname
+		elif( not r.headers['content-type'].startswith('application/json') ):
+			print "Warning:Wrong application type fetched:",r.headers['content-type']
+		else:
+			jissue = json.loads(r.text)
+			return self._packIssue( jissue )
 		return None

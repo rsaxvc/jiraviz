@@ -13,7 +13,7 @@ import argparse
 	#max-fetch-glob - in case of angry jira server admin
 
 api_url = "http://jira.atlassian.com"
-entry_point = "JRA"
+entry_point = "CWD-3051"
 username = None
 password = None
 
