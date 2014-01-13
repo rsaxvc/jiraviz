@@ -47,17 +47,22 @@ graph = pydot.Dot(graph_type='digraph',rankdir='LR')
 #add all the nodes
 nodes = dict()
 for issue in j.nodes:
+	if( issue.status == 'Resolved' ):
+		color = "gray"
+	else:
+		color = "green"
+
 	nodes[issue.key] = pydot.Node(
 		issue.key+"("+issue.status+")\\n"+issue.summary,
 		style="filled",
 		URL="\"" + args.api + "/browse/" + issue.key + "\"",
-		color="gray"
+		color=color
 		)
 	graph.add_node(nodes[issue.key])
 	print issue
 
 #add all the edges
 for edge in j.edges:
-	graph.add_edge( pydot.Edge(nodes[edge.tail], nodes[edge.head]) )
+	graph.add_edge( pydot.Edge(nodes[edge.tail], nodes[edge.head], penwidth="3") )
 
 graph.write(args.filename, format=args.filetype)
