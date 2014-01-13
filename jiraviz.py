@@ -48,7 +48,11 @@ graph = pydot.Dot(graph_type='digraph',rankdir='LR')
 #add all the nodes
 nodes = dict()
 for issue in j.nodes:
-	nodes[issue.key] = pydot.Node(issue.key+"\\n"+issue.summary, style="filled" )
+	nodes[issue.key] = pydot.Node(
+		issue.key+"\\n"+issue.summary,
+		style="filled",
+		URL="\"" + args.api + "/browse/" + issue.key + "\""
+		)
 	graph.add_node(nodes[issue.key])
 	print issue
 
