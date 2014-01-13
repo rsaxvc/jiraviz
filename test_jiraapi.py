@@ -10,7 +10,7 @@ projectname="WBS" #a project to iterate
 print "Test:Fetching",issuename
 i = j.fetchIssue(issuename)
 if( i.key == issuename ):
-	print "",i
+	print "","(",i.status,")",i
 else:
 	print "","Key Mismatch!", i.key, "vs", issuename
 
@@ -19,7 +19,7 @@ jissues = j.fetchIssuesFromProject(projectname)
 for issue in jissues:
 	i = j.fetchIssue(issue.key)
 	if( issue.key == i.key ):
-		print "",i
+		print "","(",i.status,")",i
 	else:
 		print "","Key Mismatch!", issue.key, "vs", i.key
 
@@ -29,6 +29,6 @@ for issue in jissues:
 print "Test:Fetching enumerated issues individually from",projectname
 for issue in jissues:
 	i = j.fetchIssue(issue.key)
-	print "",i
+	print "","(",i.status,")",i
 	for l in i.links:
 		print "","",l

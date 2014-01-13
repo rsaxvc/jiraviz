@@ -30,7 +30,6 @@ else:
 
 #still need to add
 	#optional-goal-issue
-	#colors?
 	#output-resolution?
 	#max-fetch-glob - in case of angry jira server admin
 
@@ -49,9 +48,10 @@ graph = pydot.Dot(graph_type='digraph',rankdir='LR')
 nodes = dict()
 for issue in j.nodes:
 	nodes[issue.key] = pydot.Node(
-		issue.key+"\\n"+issue.summary,
+		issue.key+"("+issue.status+")\\n"+issue.summary,
 		style="filled",
-		URL="\"" + args.api + "/browse/" + issue.key + "\""
+		URL="\"" + args.api + "/browse/" + issue.key + "\"",
+		color="gray"
 		)
 	graph.add_node(nodes[issue.key])
 	print issue
