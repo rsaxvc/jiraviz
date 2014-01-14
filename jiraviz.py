@@ -55,7 +55,7 @@ for issuekey in j.nodes:
 				break
 
 	nodes[issue.key] = pydot.Node(
-		(issue.key+"("+issue.status+")["+issue.priority+"]\\n"+issue.summary).replace("\"","\\\""),
+		(issue.summary + "\\n" + issue.key+"("+issue.status+")["+issue.priority+"]").replace("\"","\\\""),
 		style="filled",
 		URL="\"" + args.api + "/browse/" + issue.key + "\"",
 		color=color
