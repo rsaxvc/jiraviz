@@ -9,7 +9,11 @@ parser.add_argument("--username", help="username of scraper user")
 parser.add_argument("--password", help="password of dedicated scraper user")
 parser.add_argument("--filename", help="output filename, defaults to <entrypoint>.svg")
 parser.add_argument("--filetype", help="usually guessed from filename, can be set to svg/dia/ps/png/..?")
+parser.add_argument("--title", help="Graph title")
 args = parser.parse_args()
+
+if not args.title:
+	args.title = ""
 
 if not args.api:
 	args.api = "http://jira.atlassian.com"
@@ -37,7 +41,12 @@ j = JiraWalk(args.api, args.entrypoint, args.username, args.password)
 #graph the graph with graphviz
 import pydot	
 # specify a directed-graph
-graph = pydot.Dot(graph_type='digraph',rankdir='LR')
+graph = pydot.Dot(
+	graph_type='digraph',
+	labelloc="t",
+	label=args.title,
+	rankdir='LR'
+	)
 
 #add all the nodes
 nodes = dict()
