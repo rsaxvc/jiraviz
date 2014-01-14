@@ -6,7 +6,7 @@ j = JiraWalk("https://jira.atlassian.com", "WBS", None, None)
 
 print "","Printing nodes"
 for node in j.nodes:
-	print "","",node
+	print "","",j.nodes[node]
 
 print "","Printing edges"
 for edge in j.edges:
@@ -18,7 +18,7 @@ j = JiraWalk("https://jira.atlassian.com", "JRA-9", None, None)
 
 print "","Printing nodes"
 for node in j.nodes:
-	print "","",node
+	print "","",j.nodes[node]
 
 print "","Printing edges"
 for edge in j.edges:

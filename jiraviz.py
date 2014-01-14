@@ -46,7 +46,8 @@ graph = pydot.Dot(graph_type='digraph',rankdir='LR')
 
 #add all the nodes
 nodes = dict()
-for issue in j.nodes:
+for issuekey in j.nodes:
+	issue = j.nodes[issuekey]
 	if( issue.status == 'Resolved' ):
 		color = "gray"
 	else:

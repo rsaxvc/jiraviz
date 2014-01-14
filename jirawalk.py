@@ -40,7 +40,6 @@ class JiraWalk:
 		return len(self.todo) == 0
 
 	def __init__(self, apiserver, entryPoints, username, password ):
-		self.nodes = list()
 		self.edges = list()
 
 		self.todo = dict()
@@ -64,9 +63,8 @@ class JiraWalk:
 
 		#compact data for API caller and destroy temporaries
 		for nodekey in self.done:
-			node = self.done[nodekey]
-			del node.links
-			self.nodes.append(node)
+			del self.done[nodekey].links
+		self.nodes = self.done
 		del self.done
 		del self.todo
 		del self.j
