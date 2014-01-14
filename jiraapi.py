@@ -14,11 +14,12 @@ class JiraAPI:
 
 	class Issue:
 		"""represents a single JIRA issue"""
-		def __init__( self, key, links, status, summary ):
+		def __init__( self, key, links, status, summary, priority ):
 			self.key = key
 			self.links = links
 			self.summary = summary
 			self.status = status
+			self.priority = priority
 
 		def __str__( self ):
 			return self.key + ":" + self.summary
@@ -49,11 +50,16 @@ class JiraAPI:
 					links.append( self.IssueLink("blocking",jlink['outwardIssue']['key'] ) )
 				elif 'inwardIssue' in jlink:
 					links.append( self.IssueLink("is blocked by",jlink['inwardIssue']['key'] ) )
+		if( 'priority' in jissue['fields'] and jissue['fields']['priority'] != None ):
+			prio = jissue['fields']['priority']['name']
+		else:
+			prio = ""
 		return self.Issue(
 			jissue['key'],
 			links,
 			jissue['fields']['status']['name'],
-			jissue['fields']['summary']
+			jissue['fields']['summary'],
+			prio
 			)
 
 	def _fetchIssueCountFromProject( self, projectname ):
