@@ -33,9 +33,9 @@ class JiraAPI:
 		"""fetch/execute a query, managing basic-auth as needed"""
 		#print "Querying ",queryurl
 		if self.username == None or self.password == None:
-			r = requests.get(queryurl)
+			r = requests.get(queryurl, verify=False)
 		else:
-			r = requests.get(queryurl, auth=(self.username, self.password) )
+			r = requests.get(queryurl, verify=False, auth=(self.username, self.password) )
 		return r
 
 	def _packIssue( self, jissue ):
