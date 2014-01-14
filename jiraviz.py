@@ -48,10 +48,16 @@ graph = pydot.Dot(graph_type='digraph',rankdir='LR')
 nodes = dict()
 for issuekey in j.nodes:
 	issue = j.nodes[issuekey]
-	if( issue.status == 'Resolved' ):
-		color = "gray"
+	color = "greenyellow"
+	def closed(status):
+		return status == 'Resolved' or status == 'Closed'
+	if( closed(issue.status) ):
+		color = "lightgray"
 	else:
-		color = "green"
+		for edge in j.edges:
+			if( edge.head == issue.key and not closed( j.nodes[edge.head] ) ):
+				color = "orange"
+				break
 
 	nodes[issue.key] = pydot.Node(
 		issue.key+"("+issue.status+")\\n"+issue.summary,
