@@ -28,11 +28,6 @@ else:
 		args.filetype = "svg"
 	args.filename = args.entrypoint + "." + args.filetype
 
-#still need to add
-	#optional-goal-issue
-	#output-resolution?
-	#max-fetch-glob - in case of angry jira server admin
-
 #get all the data with JiraWalk
 from jirawalk import JiraWalk
 
