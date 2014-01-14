@@ -16,7 +16,7 @@ if not args.api:
 	print "using default API server:",args.api
 
 if not args.entrypoint:
-	args.entrypoint = "CWD-3051,WBS-4"
+	args.entrypoint = "CWD-3051,WBS-4,JRA-30423"
 	print "using demo API entrypoints:",args.entrypoint
 
 if args.filename:
@@ -55,7 +55,7 @@ for issuekey in j.nodes:
 				break
 
 	nodes[issue.key] = pydot.Node(
-		issue.key+"("+issue.status+")\\n"+issue.summary,
+		(issue.key+"("+issue.status+")\\n"+issue.summary).replace("\"","\\\""),
 		style="filled",
 		URL="\"" + args.api + "/browse/" + issue.key + "\"",
 		color=color
