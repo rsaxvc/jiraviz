@@ -14,12 +14,13 @@ class JiraAPI:
 
 	class Issue:
 		"""represents a single JIRA issue"""
-		def __init__( self, key, links, status, summary, priority ):
+		def __init__( self, key, links, status, summary, priority, assignee ):
 			self.key = key
 			self.links = links
 			self.summary = summary
 			self.status = status
 			self.priority = priority
+			self.assignee = assignee
 
 		def __str__( self ):
 			return self.key + ":" + self.summary
@@ -43,23 +44,38 @@ class JiraAPI:
 		"""pack a JSON issue to an Issue"""
 		jfields = jissue['fields']
 		jlinks = jfields['issuelinks']
-		links = list()		
+		links = list()
 		for jlink in jlinks:
 			if( jlink['type']['name'] == 'Blocker' ):
+				#atlassian style
 				if 'outwardIssue' in jlink:
 					links.append( self.IssueLink("blocking",jlink['outwardIssue']['key'] ) )
 				elif 'inwardIssue' in jlink:
 					links.append( self.IssueLink("is blocked by",jlink['inwardIssue']['key'] ) )
+			elif( jlink['type']['name'] == 'Blocking' ):
+				#other style
+				if 'outwardIssue' in jlink:
+					links.append( self.IssueLink("is blocked by",jlink['outwardIssue']['key'] ) )
+				elif 'inwardIssue' in jlink:
+					links.append( self.IssueLink("blocking",jlink['inwardIssue']['key'] ) )
+
 		if( 'priority' in jissue['fields'] and jissue['fields']['priority'] != None ):
 			prio = jissue['fields']['priority']['name']
 		else:
 			prio = ""
+
+		if( 'assignee' in jissue['fields'] and jissue['fields']['assignee'] != None ):
+			assignee = jissue['fields']['assignee']['displayName']
+		else:
+			assignee = ""
+
 		return self.Issue(
 			jissue['key'],
 			links,
 			jissue['fields']['status']['name'],
 			jissue['fields']['summary'],
-			prio
+			prio,
+			assignee
 			)
 
 	def _fetchIssueCountFromProject( self, projectname ):
