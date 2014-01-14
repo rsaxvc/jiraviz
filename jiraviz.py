@@ -63,8 +63,17 @@ for issuekey in j.nodes:
 				color = "orange"
 				break
 
+	nodeText = ""
+	nodeText = nodeText + issue.summary
+	nodeText = nodeText + "\\n" + issue.key+"("+issue.status+")["+issue.priority+"]"
+	if( issue.assignee != "" ):
+		nodeText = nodeText + "\\n" + issue.assignee
+
+	#escape the quotes for DOT parser
+	nodeText = nodeText.replace("\"","\\\"")
+
 	nodes[issue.key] = pydot.Node(
-		(issue.summary + "\\n" + issue.key+"("+issue.status+")["+issue.priority+"]").replace("\"","\\\""),
+		nodeText,
 		style="filled",
 		URL="\"" + args.api + "/browse/" + issue.key + "\"",
 		color=color
