@@ -23,18 +23,12 @@ class JiraWalk:
 		for nodekey in thispass:
 			node = thispass[nodekey]
 			for link in node.links:
-				if( link.key not in self.todo and link.key not in self.done and link.key not in thispass ):
+				if( link.type == "is blocked by" and link.key not in self.todo and link.key not in self.done and link.key not in thispass ):
 					self.todo[link.key]=self.j.fetchIssue( link.key )
 
-				if( link.type == "is blocked by" ):
 					e = self.Edge( link.key, node.key )
-				elif( link.type == "blocking" ):
-					e = self.Edge( node.key, link.key )
-				else:
-					continue
-
-				if( e not in self.edges ):
-					self.edges.append( e )
+					if( e not in self.edges ):
+						self.edges.append( e )
 
 		self.done.update( thispass )
 		return len(self.todo) == 0
