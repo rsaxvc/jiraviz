@@ -52,15 +52,18 @@ graph = pydot.Dot(
 nodes = dict()
 for issuekey in j.nodes:
 	issue = j.nodes[issuekey]
-	color = "greenyellow"
+
 	def closed(status):
 		return status == 'Resolved' or status == 'Closed'
+
+	#figure out what color
+	color = "greenyellow"
 	if( closed(issue.status) ):
 		color = "lightgray"
 	else:
 		for edge in j.edges:
-			if( edge.head == issue.key and not closed( j.nodes[edge.head] ) ):
-				color = "orange"
+			if( edge.head == issue.key and not closed( j.nodes[edge.tail].status ) ):
+				color = "orangered"
 				break
 
 	nodeText = ""
@@ -69,14 +72,26 @@ for issuekey in j.nodes:
 	if( issue.assignee != "" ):
 		nodeText = nodeText + "\\n" + issue.assignee
 
+	#compute node style
+	style = "\"filled,"
+	if( closed( issue.status ) ):
+		style = style + "solid"
+	else:
+		if( issue.assignee == "" ):
+			style = style + "dotted"
+		else:
+			style = style + "bold"
+	style = style + "\""
+
 	#escape the quotes for DOT parser
 	nodeText = nodeText.replace("\"","\\\"")
 
 	nodes[issue.key] = pydot.Node(
 		nodeText,
-		style="filled",
+		style=style,
+		color="black",
 		URL="\"" + args.api + "/browse/" + issue.key + "\"",
-		color=color
+		fillcolor=color
 		)
 	graph.add_node(nodes[issue.key])
 	print issue
