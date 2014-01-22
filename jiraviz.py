@@ -59,15 +59,20 @@ def getNodeVisuals(node, edges):
 
 	#compute node style
 	style = "\"filled,"
-	if( closed( node.status ) ):
+	if( "Milestone" in node.labels ):
+		shape = "Mcircle"
+	elif( closed( node.status ) ):
 		style += "solid"
+		shape = "oval"
 	else:
 		if( node.assignee == "" ):
 			style += "dotted"
+			shape = "oval"
 		else:
 			style += "bold"
+			shape = "oval"
 	style += "\""
-	return (color,style)
+	return (color,style,shape)
 
 #get all the data with JiraWalk
 from jirawalk import JiraWalk
@@ -99,14 +104,15 @@ for issuekey in j.nodes:
 	#escape the quotes for DOT parser
 	nodeText = nodeText.replace("\"","\\\"")
 
-	(fillcolor,style) = getNodeVisuals( issue, j.edges )
+	(fillcolor,style,shape) = getNodeVisuals( issue, j.edges )
 
 	nodes[issue.key] = pydot.Node(
 		nodeText,
 		style=style,
 		color="black",
 		URL="\"" + args.api + "/browse/" + issue.key + "\"",
-		fillcolor=fillcolor
+		fillcolor=fillcolor,
+		shape=shape
 		)
 	graph.add_node(nodes[issue.key])
 	print issue
