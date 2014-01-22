@@ -32,6 +32,32 @@ else:
 		args.filetype = "svg"
 	args.filename = args.entrypoint + "." + args.filetype
 
+def closed(status):
+	return status == 'Resolved' or status == 'Closed'
+
+def getNodeVisuals(node, edges):
+	"""calculate style+color of a node"""
+	color = "greenyellow"
+	if( closed(node.status) ):
+		color = "lightgray"
+	else:
+		for edge in j.edges:
+			if( edge.head == node.key and not closed( j.nodes[edge.tail].status ) ):
+				color = "orangered"
+				break
+
+	#compute node style
+	style = "\"filled,"
+	if( closed( node.status ) ):
+		style = style + "solid"
+	else:
+		if( node.assignee == "" ):
+			style = style + "dotted"
+		else:
+			style = style + "bold"
+	style = style + "\""
+	return (color,style)
+
 #get all the data with JiraWalk
 from jirawalk import JiraWalk
 
@@ -53,45 +79,23 @@ nodes = dict()
 for issuekey in j.nodes:
 	issue = j.nodes[issuekey]
 
-	def closed(status):
-		return status == 'Resolved' or status == 'Closed'
-
-	#figure out what color
-	color = "greenyellow"
-	if( closed(issue.status) ):
-		color = "lightgray"
-	else:
-		for edge in j.edges:
-			if( edge.head == issue.key and not closed( j.nodes[edge.tail].status ) ):
-				color = "orangered"
-				break
-
 	nodeText = ""
 	nodeText = nodeText + issue.summary
 	nodeText = nodeText + "\\n" + issue.key+"("+issue.status+")["+issue.priority+"]"
 	if( issue.assignee != "" ):
 		nodeText = nodeText + "\\n" + issue.assignee
 
-	#compute node style
-	style = "\"filled,"
-	if( closed( issue.status ) ):
-		style = style + "solid"
-	else:
-		if( issue.assignee == "" ):
-			style = style + "dotted"
-		else:
-			style = style + "bold"
-	style = style + "\""
-
 	#escape the quotes for DOT parser
 	nodeText = nodeText.replace("\"","\\\"")
+
+	(fillcolor,style) = getNodeVisuals( issue, j.edges )
 
 	nodes[issue.key] = pydot.Node(
 		nodeText,
 		style=style,
 		color="black",
 		URL="\"" + args.api + "/browse/" + issue.key + "\"",
-		fillcolor=color
+		fillcolor=fillcolor
 		)
 	graph.add_node(nodes[issue.key])
 	print issue
