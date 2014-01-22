@@ -60,13 +60,13 @@ def getNodeVisuals(node, edges):
 	#compute node style
 	style = "\"filled,"
 	if( closed( node.status ) ):
-		style = style + "solid"
+		style += "solid"
 	else:
 		if( node.assignee == "" ):
-			style = style + "dotted"
+			style += "dotted"
 		else:
-			style = style + "bold"
-	style = style + "\""
+			style += "bold"
+	style += "\""
 	return (color,style)
 
 #get all the data with JiraWalk
@@ -91,10 +91,10 @@ for issuekey in j.nodes:
 	issue = j.nodes[issuekey]
 
 	nodeText = ""
-	nodeText = nodeText + issue.summary
-	nodeText = nodeText + "\\n" + issue.key+"("+issue.status+")["+issue.priority+"]"
+	nodeText += issue.summary
+	nodeText += "\\n" + issue.key+"("+issue.status+")["+issue.priority+"]"
 	if( issue.assignee != "" ):
-		nodeText = nodeText + "\\n" + issue.assignee
+		nodeText += "\\n" + issue.assignee
 
 	#escape the quotes for DOT parser
 	nodeText = nodeText.replace("\"","\\\"")
