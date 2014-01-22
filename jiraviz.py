@@ -37,14 +37,25 @@ def closed(status):
 
 def getNodeVisuals(node, edges):
 	"""calculate style+color of a node"""
-	color = "greenyellow"
+
+	blocked = False
+	for edge in j.edges:
+		if( edge.head == node.key and not closed( j.nodes[edge.tail].status ) ):
+			blocked = True
+			break
+
 	if( closed(node.status) ):
 		color = "lightgray"
+	elif( blocked ):
+		if( "Optional" in node.labels ):
+			color = "orange"
+		else:
+			color = "orangered"
 	else:
-		for edge in j.edges:
-			if( edge.head == node.key and not closed( j.nodes[edge.tail].status ) ):
-				color = "orangered"
-				break
+		if( "Optional" in node.labels ):
+			color = "greenyellow"
+		else:
+			color = "green"
 
 	#compute node style
 	style = "\"filled,"
