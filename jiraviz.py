@@ -82,7 +82,8 @@ graph = pydot.Dot(
 	graph_type='digraph',
 	labelloc="t",
 	label=args.title,
-	rankdir='LR'
+	rankdir='LR',
+	remincross="True"
 	)
 
 #add all the nodes
