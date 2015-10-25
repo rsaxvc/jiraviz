@@ -76,7 +76,7 @@ class JiraAPI:
 
 	def _jsonQuery( self, path ):
 		query = self.baseurl + path
-		r = self.session.get(query, verify=False)
+		r = self.session.get(query)
 		if( r.status_code < 200 or r.status_code > 299 ):
 			print "Warning:Unable to retrieve data for",projectname," from:",query
 			return None
