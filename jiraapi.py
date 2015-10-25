@@ -33,11 +33,6 @@ class JiraAPI:
 		self.baseurl = baseurl
 		self.ara_throttle = 20 #angry Ron avoider
 
-	def _runQuery( self, queryurl ):
-		"""fetch/execute a query, managing basic-auth as needed"""
-		#print "Querying ",queryurl
-		return self.session.get(queryurl, verify=False)
-
 	def _packIssue( self, jissue ):
 		"""pack a JSON issue to an Issue"""
 		jfields = jissue['fields']
@@ -79,34 +74,35 @@ class JiraAPI:
 			labels
 			)
 
+	def _jsonQuery( self, path ):
+		query = self.baseurl + path
+		r = self.session.get(query, verify=False)
+		if( r.status_code < 200 or r.status_code > 299 ):
+			print "Warning:Unable to retrieve data for",projectname," from:",query
+			return None
+		elif( not r.headers['content-type'].startswith('application/json') ):
+			print "Warning:Wrong application type fetched:",r.headers['content-type']," from:",query
+			return None
+		else:
+			return json.loads(r.text)
+
 	def _fetchIssueCountFromProject( self, projectname ):
 		"""given a project name, returns number of issues in project"""
-		projectquery = self.baseurl + "/rest/api/latest/search?jql=project=" + projectname + "&maxResults=0";
-		r = self._runQuery(projectquery)
-		if( r.status_code < 200 or r.status_code > 299 ):
-			print "Warning:Unable to retrieve data for",projectname
-		elif( not r.headers['content-type'].startswith('application/json') ):
-			print "Warning:Wrong application type fetched:",r.headers['content-type']
-		else:
-			j = json.loads(r.text)
+		j = self._jsonQuery( "/rest/api/latest/search?jql=project=" + projectname + "&maxResults=0" )
+		if( j ):
 			return j['total']
 		return 0
 
 	def _fetchSomeIssuesFromProject( self, projectname, min, max ):
 		"""given a project name, returns some of the issues from that project"""
 		issues = list()
-		projectquery = self.baseurl + "/rest/api/latest/search?jql=project=" + projectname + "&maxResults=" + str( max-min ) + "&startAt=" + str(min)
-		r = self._runQuery( projectquery )
-		if( r.status_code < 200 or r.status_code > 299 ):
-			print "Warning:Unable to retrieve data for",projectname
-		elif( not r.headers['content-type'].startswith('application/json') ):
-			print "Warning:Wrong application type fetched:",r.headers['content-type']
-		else:
-			j = json.loads( r.text )
+		j = self._jsonQuery( "/rest/api/latest/search?jql=project=" + projectname + "&maxResults=" + str( max-min ) + "&startAt=" + str(min) )
+		if( j ):
 			jissues = j['issues']
 			for jissue in jissues:
 				issues.append( self._packIssue( jissue ) )
-		return issues
+			return issues
+		return ()
 
 	def fetchIssuesFromProject( self, projectname ):
 		"""given a project name, returns a list of issues in that project"""
@@ -121,13 +117,7 @@ class JiraAPI:
 
 	def fetchIssue( self, issuename ):
 		"""given an issue name(ISSUE-n), returns that issue"""
-		projectquery = self.baseurl + "/rest/api/latest/issue/" + issuename + "?expand=links"
-		r = self._runQuery(projectquery)
-		if( r.status_code < 200 or r.status_code > 299 ):
-			print "Warning:Unable to retrieve data for",issuename
-		elif( not r.headers['content-type'].startswith('application/json') ):
-			print "Warning:Wrong application type fetched:",r.headers['content-type']
-		else:
-			jissue = json.loads(r.text)
-			return self._packIssue( jissue )
+		j = self._jsonQuery( "/rest/api/latest/issue/" + issuename + "?expand=links" )
+		if( j ):
+			return self._packIssue( j )
 		return None
