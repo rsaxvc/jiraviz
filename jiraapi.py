@@ -27,19 +27,16 @@ class JiraAPI:
 			return self.key + ":" + self.summary
 
 	def __init__(self, baseurl, username, password ):
+		self.session = requests.Session()
+		if( username and password ):
+			self.session.auth = (username, password)
 		self.baseurl = baseurl
-		self.username = username
-		self.password = password
 		self.ara_throttle = 20 #angry Ron avoider
 
 	def _runQuery( self, queryurl ):
 		"""fetch/execute a query, managing basic-auth as needed"""
 		#print "Querying ",queryurl
-		if self.username == None or self.password == None:
-			r = requests.get(queryurl, verify=False)
-		else:
-			r = requests.get(queryurl, verify=False, auth=(self.username, self.password) )
-		return r
+		return self.session.get(queryurl, verify=False)
 
 	def _packIssue( self, jissue ):
 		"""pack a JSON issue to an Issue"""
