@@ -3,25 +3,26 @@
 #get all the arguments with argparse
 import argparse
 parser = argparse.ArgumentParser(description='Scrape JIRA issue dependencies and graph them')
-parser.add_argument("--api", help="API target, like http://jira.atlassian.com (no trailing slash)")
-parser.add_argument("--entrypoint", help="Entry point, comma-separated list of JIRA issues or projects")
+parser.add_argument(
+	"--api",
+	help="API target, like http://jira.atlassian.com (no trailing slash)",
+	default="http://jira.atlassian.com"
+	)
+parser.add_argument(
+	"--entrypoint",
+	help="Entry point, comma-separated list of JIRA issues or projects",
+	default="CWD-3051,WBS-4,JRA-30423"
+	)
 parser.add_argument("--username", help="username of scraper user")
 parser.add_argument("--password", help="password of dedicated scraper user")
 parser.add_argument("--filename", help="output filename, defaults to <entrypoint>.svg")
 parser.add_argument("--filetype", help="usually guessed from filename, can be set to svg/dia/ps/png/..?")
-parser.add_argument("--title", help="Graph title")
+parser.add_argument(
+	"--title",
+	help="Graph title",
+	default="graph"
+	)
 args = parser.parse_args()
-
-if not args.title:
-	args.title = ""
-
-if not args.api:
-	args.api = "http://jira.atlassian.com"
-	print "using default API server:",args.api
-
-if not args.entrypoint:
-	args.entrypoint = "CWD-3051,WBS-4,JRA-30423"
-	print "using demo API entrypoints:",args.entrypoint
 
 if args.filename:
 	if not args.filetype:
@@ -81,7 +82,7 @@ import pydot
 graph = pydot.Dot(
 	graph_type='digraph',
 	labelloc="t",
-	label=args.title,
+	label='\"' + args.title + '\"',
 	rankdir='LR',
 	remincross="True"
 	)
