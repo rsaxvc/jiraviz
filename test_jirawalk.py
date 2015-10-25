@@ -1,8 +1,8 @@
 #!/usr/bin/python
 from  jirawalk import JiraWalk
 
-print "Test:Walking issues starting with:WBS"
-j = JiraWalk("https://jira.atlassian.com", "WBS", None, None)
+print "Test:Walking issues starting with:CEP"
+j = JiraWalk("https://jira.atlassian.com", "CEP", None, None)
 
 print "","Printing nodes"
 for node in j.nodes:

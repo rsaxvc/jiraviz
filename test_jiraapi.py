@@ -4,8 +4,8 @@ from  jiraapi import JiraAPI
 
 #test config
 j = JiraAPI("https://jira.atlassian.com", None, None ) #set up connection
-issuename="WBS-9" #a single issue to test
-projectname="WBS" #a project to iterate
+issuename="CEP-154" #a single issue to test
+projectname="CEP" #a project to iterate
 
 print "Test:Fetching",issuename
 i = j.fetchIssue(issuename)
