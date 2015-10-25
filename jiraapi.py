@@ -78,7 +78,7 @@ class JiraAPI:
 		query = self.baseurl + path
 		r = self.session.get(query)
 		if( r.status_code < 200 or r.status_code > 299 ):
-			print "Warning:Unable to retrieve data for",projectname," from:",query
+			print "Warning:Unable to retrieve data from:",query
 			return None
 		elif( not r.headers['content-type'].startswith('application/json') ):
 			print "Warning:Wrong application type fetched:",r.headers['content-type']," from:",query
