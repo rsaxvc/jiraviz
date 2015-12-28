@@ -39,13 +39,14 @@ class JiraAPI:
 		jlinks = jfields['issuelinks']
 		links = list()
 		for jlink in jlinks:
-			if( jlink['type']['name'] == 'Blocker' ):
+			linkname = jlink['type']['name']
+			if( linkname == 'Blocker' or linkname == 'Blocks' ):
 				#atlassian style
 				if 'outwardIssue' in jlink:
 					links.append( self.IssueLink("blocking",jlink['outwardIssue']['key'] ) )
 				elif 'inwardIssue' in jlink:
 					links.append( self.IssueLink("is blocked by",jlink['inwardIssue']['key'] ) )
-			elif( jlink['type']['name'] == 'Blocking' ):
+			elif( linkname == 'Blocking' ):
 				#other style
 				if 'outwardIssue' in jlink:
 					links.append( self.IssueLink("is blocked by",jlink['outwardIssue']['key'] ) )
