@@ -43,7 +43,7 @@ class jiraFilter:
 
 	def useLink(self,link):
 		"""Decide if a link should be further explored"""
-		linkTypeFilter=["blocks","clones"]
+		linkTypeFilter=["blocks","clones","relates to"]
 		return link.outwardType in linkTypeFilter
 
 class jiraDecorator:
@@ -77,11 +77,12 @@ class jiraDecorator:
 		return r
 
 	def getLinkVisuals(self, link, inwardIssue, outwardIssue ):
+		simpleLinkTypes = ["clones", "relates to"]
 		r = {}
 		r["color"] = "black"
 		r["style"] = "solid"
 		r["tooltip"] = link.outwardType
-		if( link.outwardType == "clones" ):
+		if( link.outwardType in simpleLinkTypes ):
 			r["dir"] = "none"
 			r["penwidth"] = 1
 			r["constraint"] = "false"
