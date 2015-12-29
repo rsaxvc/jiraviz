@@ -10,9 +10,9 @@ class JiraWalk:
 		thispass = self.todo
 		self.todo = dict()
 
-		for nodekey in thispass:
-			node = thispass[nodekey]
-			for link in node.links:
+		for issueKey in thispass:
+			issue = thispass[issueKey]
+			for link in issue.links:
 				if( self.filter.useLink( link ) ):
 					if( link.inwardKey not in self.todo and link.inwardKey not in self.done and link.inwardKey not in thispass ):
 						self.todo[link.inwardKey] = self.j.fetchIssue( link.inwardKey )
@@ -53,9 +53,9 @@ class JiraWalk:
 			pass
 
 		#compact data for API caller and destroy temporaries
-#		for nodekey in self.done:
-#			del self.done[nodekey].links
-		self.nodes = self.done
+#		for issueKey in self.done:
+#			del self.done[issueKey].links
+		self.issues = self.done
 		del self.done
 		del self.todo
 		del self.j

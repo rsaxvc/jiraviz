@@ -55,7 +55,7 @@ class jiraDecorator:
 
 		color = "lightgreen"
 		for link in issue.links:
-			if( link.outwardKey == issue.key and not self.closed( j.nodes[link.inwardKey] ) ):
+			if( link.outwardKey == issue.key and not self.closed( j.issues[link.inwardKey] ) ):
 				color = "orange"
 				break
 
@@ -97,8 +97,8 @@ graph = pydot.Dot(
 #add all the issues
 issues = dict()
 decorator = jiraDecorator()
-for issuekey in j.nodes:
-	issue = j.nodes[issuekey]
+for issuekey in j.issues:
+	issue = j.issues[issuekey]
 
 	nodeText = ""
 	nodeText += issue.summary
@@ -123,7 +123,7 @@ for issuekey in j.nodes:
 
 #add all the edges
 for link in j.links:
-	(color,style,dir,width) = decorator.getLinkVisuals( link, j.nodes[link.inwardKey], j.nodes[link.outwardKey] )
+	(color,style,dir,width) = decorator.getLinkVisuals( link, j.issues[link.inwardKey], j.issues[link.outwardKey] )
 
 	graph.add_edge( pydot.Edge( issues[link.inwardKey], issues[link.outwardKey], penwidth=width, style=style, dir=dir, tooltip=link.outwardType) )
 	print link
