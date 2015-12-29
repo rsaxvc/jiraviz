@@ -49,9 +49,13 @@ class JiraWalk:
 		issues = list()
 		for entryPoint in entryPoints.split(','):
 			if( entryPoint.find('-') != -1 ):
-				issues.append( self.j.fetchIssue(entryPoint) )
+				i = self.j.fetchIssue(entryPoint)
+				if( filter.useIssue( i ) ):
+					issues.append( i )
 			else:
-				issues = issues + self.j.fetchIssuesFromProject(entryPoint)
+				for i in self.j.fetchIssuesFromProject(entryPoint):
+					if( filter.useIssue( i ) ):
+						issues.append( i )
 
 			for issue in issues:
 				self.todo[issue.key] = issue

@@ -34,43 +34,43 @@ else:
 	args.filename = args.entrypoint + "." + args.filetype
 
 class jiraFilter:
-	def closed(self, node):
-		return node.status == 'Resolved' or node.status == 'Closed'
+	def closed(self, issue):
+		return issue.status == 'Resolved' or issue.status == 'Closed'
 
-	def useNode(self, node):
-		return not self.closed( node )
+	def useIssue(self, issue):
+		return not self.closed( issue )
 
-	def useEdge(self,edge):
+	def useLink(self,edge):
 		return True
 
-	def getNodeVisuals(self,node, edges):
-		"""calculate style+color of a node"""
+	def getIssueVisuals(self, issue, edges):
+		"""calculate style+color of an issue"""
 
 		blocked = False
 		for edge in j.edges:
-			if( edge.head == node.key and not self.closed( j.nodes[edge.tail] ) ):
+			if( edge.head == issue.key and not self.closed( j.nodes[edge.tail] ) ):
 				blocked = True
 				break
 
-		if( self.closed(node) ):
+		if( self.closed( issue ) ):
 			color = "lightgray"
 		elif( blocked ):
-			if( "Optional" in node.labels ):
+			if( "Optional" in issue.labels ):
 				color = "orange"
 			else:
 				color = "orangered"
 		else:
-			if( "Optional" in node.labels ):
+			if( "Optional" in issue.labels ):
 				color = "greenyellow"
 			else:
 				color = "green"
 
-		#compute node style
+		#compute issue style
 		style = "\"filled,"
-		if( self.closed( node ) ):
+		if( self.closed( issue ) ):
 			style += "solid"
 		else:
-			if( node.assignee == "" ):
+			if( issue.assignee == "" ):
 				style += "dotted"
 			else:
 				style += "bold"
@@ -96,8 +96,8 @@ graph = pydot.Dot(
 	remincross="True"
 	)
 
-#add all the nodes
-nodes = dict()
+#add all the issues
+issues = dict()
 for issuekey in j.nodes:
 	issue = j.nodes[issuekey]
 
@@ -110,20 +110,20 @@ for issuekey in j.nodes:
 	#escape the quotes for DOT parser
 	nodeText = nodeText.replace("\"","\\\"")
 
-	(fillcolor,style) = filter.getNodeVisuals( issue, j.edges )
+	(fillcolor,style) = filter.getIssueVisuals( issue, j.edges )
 
-	nodes[issue.key] = pydot.Node(
+	issues[issue.key] = pydot.Node(
 		nodeText,
 		style=style,
 		color="black",
 		URL="\"" + args.api + "/browse/" + issue.key + "\"",
 		fillcolor=fillcolor
 		)
-	graph.add_node(nodes[issue.key])
+	graph.add_node(issues[issue.key])
 	print issue
 
 #add all the edges
 for edge in j.edges:
-	graph.add_edge( pydot.Edge(nodes[edge.tail], nodes[edge.head], penwidth="3") )
+	graph.add_edge( pydot.Edge(issues[edge.tail], issues[edge.head], penwidth="3") )
 
 graph.write(args.filename, format=args.filetype)
