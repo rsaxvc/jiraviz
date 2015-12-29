@@ -39,7 +39,7 @@ class JiraWalk:
 		self.done.update( thispass )
 		return len(self.todo) == 0
 
-	def __init__(self, apiserver, entryPoints, username, password ):
+	def __init__(self, apiserver, entryPoints, username, password, filter):
 		self.edges = list()
 
 		self.todo = dict()

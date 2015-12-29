@@ -33,48 +33,57 @@ else:
 		args.filetype = "svg"
 	args.filename = args.entrypoint + "." + args.filetype
 
-def closed(node):
-	return node.status == 'Resolved' or node.status == 'Closed'
+class jiraFilter:
+	def closed(self, node):
+		return node.status == 'Resolved' or node.status == 'Closed'
 
-def getNodeVisuals(node, edges):
-	"""calculate style+color of a node"""
+	def useNode(self, node):
+		return not self.closed( node )
 
-	blocked = False
-	for edge in j.edges:
-		if( edge.head == node.key and not closed( j.nodes[edge.tail] ) ):
-			blocked = True
-			break
+	def useEdge(self,edge):
+		return True
 
-	if( closed(node) ):
-		color = "lightgray"
-	elif( blocked ):
-		if( "Optional" in node.labels ):
-			color = "orange"
+	def getNodeVisuals(self,node, edges):
+		"""calculate style+color of a node"""
+
+		blocked = False
+		for edge in j.edges:
+			if( edge.head == node.key and not self.closed( j.nodes[edge.tail] ) ):
+				blocked = True
+				break
+
+		if( self.closed(node) ):
+			color = "lightgray"
+		elif( blocked ):
+			if( "Optional" in node.labels ):
+				color = "orange"
+			else:
+				color = "orangered"
 		else:
-			color = "orangered"
-	else:
-		if( "Optional" in node.labels ):
-			color = "greenyellow"
-		else:
-			color = "green"
+			if( "Optional" in node.labels ):
+				color = "greenyellow"
+			else:
+				color = "green"
 
-	#compute node style
-	style = "\"filled,"
-	if( closed( node ) ):
-		style += "solid"
-	else:
-		if( node.assignee == "" ):
-			style += "dotted"
+		#compute node style
+		style = "\"filled,"
+		if( self.closed( node ) ):
+			style += "solid"
 		else:
-			style += "bold"
-	style += "\""
-	return (color,style)
+			if( node.assignee == "" ):
+				style += "dotted"
+			else:
+				style += "bold"
+		style += "\""
+		return (color,style)
 
 #get all the data with JiraWalk
 from jirawalk import JiraWalk
 
+filter = jiraFilter()
+
 #start with project or user-selected issue
-j = JiraWalk(args.api, args.entrypoint, args.username, args.password)
+j = JiraWalk(args.api, args.entrypoint, args.username, args.password, filter)
 
 #graph the graph with graphviz
 import pydot	
@@ -101,7 +110,7 @@ for issuekey in j.nodes:
 	#escape the quotes for DOT parser
 	nodeText = nodeText.replace("\"","\\\"")
 
-	(fillcolor,style) = getNodeVisuals( issue, j.edges )
+	(fillcolor,style) = filter.getNodeVisuals( issue, j.edges )
 
 	nodes[issue.key] = pydot.Node(
 		nodeText,
