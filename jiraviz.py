@@ -52,11 +52,15 @@ class jiraDecorator:
 
 	def getIssueVisuals(self, issue):
 		"""calculate style+color of an issue"""
+		r = {}
 
-		color = "lightgreen"
+		r["color"] = "black"
+
+		#compute color - orange if blocked
+		r["fillcolor"] = "lightgreen"
 		for link in issue.links:
-			if( link.outwardKey == issue.key and not self.closed( j.issues[link.inwardKey] ) ):
-				color = "orange"
+			if( link.outwardKey == issue.key and not self.closed( j.issues[link.inwardKey] ) and link.outwardType == "blocks" ):
+				r["fillcolor"] = "orange"
 				break
 
 		#compute issue style
@@ -69,13 +73,21 @@ class jiraDecorator:
 			else:
 				style += "bold"
 		style += "\""
-		return (color,style)
+		r["style"] = style
+		return r
 
 	def getLinkVisuals(self, link, inwardIssue, outwardIssue ):
+		r = {}
+		r["color"] = "black"
+		r["style"] = "solid"
+		r["tooltip"] = link.outwardType
 		if( link.outwardType == "clones" ):
-			return ('black', 'solid', 'none', 1 )
+			r["dir"] = "none"
+			r["penwidth"] = 1
 		else:
-			return ('black', 'solid', 'forward', 3 )
+			r["dir"] = "forward"
+			r["penwidth"] = 2
+		return r
 
 #get all the data with JiraWalk
 from jirawalk import JiraWalk
@@ -109,23 +121,18 @@ for issuekey in j.issues:
 	#escape the quotes for DOT parser
 	nodeText = nodeText.replace("\"","\\\"")
 
-	(fillcolor,style) = decorator.getIssueVisuals( issue )
-
 	issues[issue.key] = pydot.Node(
 		nodeText,
-		style=style,
-		color="black",
 		URL="\"" + args.api + "/browse/" + issue.key + "\"",
-		fillcolor=fillcolor
+		**decorator.getIssueVisuals( issue )
 		)
 	graph.add_node(issues[issue.key])
 	print issue
 
 #add all the edges
 for link in j.links:
-	(color,style,dir,width) = decorator.getLinkVisuals( link, j.issues[link.inwardKey], j.issues[link.outwardKey] )
-
-	graph.add_edge( pydot.Edge( issues[link.inwardKey], issues[link.outwardKey], penwidth=width, style=style, dir=dir, tooltip=link.outwardType) )
 	print link
+	graph.add_edge( pydot.Edge( issues[link.inwardKey], issues[link.outwardKey],
+		**decorator.getLinkVisuals( link, j.issues[link.inwardKey], j.issues[link.outwardKey] ) ) )
 
 graph.write(args.filename, format=args.filetype)
