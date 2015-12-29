@@ -125,7 +125,7 @@ for issuekey in j.nodes:
 for link in j.links:
 	(color,style,dir,width) = decorator.getLinkVisuals( link, j.nodes[link.inwardKey], j.nodes[link.outwardKey] )
 
-	graph.add_edge( pydot.Edge( issues[link.inwardKey], issues[link.outwardKey], penwidth=width, style=style, dir=dir) )
+	graph.add_edge( pydot.Edge( issues[link.inwardKey], issues[link.outwardKey], penwidth=width, style=style, dir=dir, tooltip=link.outwardType) )
 	print link
 
 graph.write(args.filename, format=args.filetype)
