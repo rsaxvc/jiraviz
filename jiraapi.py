@@ -5,12 +5,20 @@ class JiraAPI:
 	"""implements a connection to a JIRA server. Private functions start with _"""
 	class IssueLink:
 		"""connects this issue to another"""
-		def __init__( self, type, key ):
-			self.type=type
-			self.key=key
+		def __init__( self, inwardType, outwardType, inwardKey, outwardKey ):
+			self.inwardType = inwardType
+			self.outwardType = outwardType
+			self.inwardKey = inwardKey
+			self.outwardKey = outwardKey
 
 		def __str__( self ):
-			return self.type + " " + self.key
+			return self.inwardKey + " " + self.outwardType + " " + self.outwardKey
+
+		def __eq__( self, other ):
+			return self.inwardKey == other.inwardKey \
+				and self.outwardKey == other.outwardKey \
+				and self.inwardType == other.inwardType \
+				and self.outwardType == other.outwardType
 
 	class Issue:
 		"""represents a single JIRA issue"""
@@ -39,19 +47,12 @@ class JiraAPI:
 		jlinks = jfields['issuelinks']
 		links = list()
 		for jlink in jlinks:
-			linkname = jlink['type']['name']
-			if( linkname == 'Blocker' or linkname == 'Blocks' ):
-				#atlassian style
-				if 'outwardIssue' in jlink:
-					links.append( self.IssueLink("blocking",jlink['outwardIssue']['key'] ) )
-				elif 'inwardIssue' in jlink:
-					links.append( self.IssueLink("is blocked by",jlink['inwardIssue']['key'] ) )
-			elif( linkname == 'Blocking' ):
-				#other style
-				if 'outwardIssue' in jlink:
-					links.append( self.IssueLink("is blocked by",jlink['outwardIssue']['key'] ) )
-				elif 'inwardIssue' in jlink:
-					links.append( self.IssueLink("blocking",jlink['inwardIssue']['key'] ) )
+			jtype = jlink['type']
+			linkname = jtype['name']
+			if 'outwardIssue' in jlink:
+				links.append( self.IssueLink(jtype['inward'],jtype['outward'],jissue['key'],jlink['outwardIssue']['key'] ) )
+			elif 'inwardIssue' in jlink:
+				links.append( self.IssueLink(jtype['inward'],jtype['outward'],jlink['inwardIssue']['key'],jissue['key'] ) )
 
 		labels = jfields['labels']
 

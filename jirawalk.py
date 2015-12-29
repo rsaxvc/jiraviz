@@ -2,16 +2,6 @@ from jiraapi import JiraAPI
 
 class JiraWalk:
 	"""walk a Jira server collecting map of issues"""
-	class Edge:
-		def __init__( self, blocked, blocked_by ):
-			self.head = blocked_by
-			self.tail = blocked
-
-		def __eq__( self, other ):
-			return self.head == other.head and self.tail == other.tail
-
-		def __str__( self ):
-			return self.head + " is blocked by " + self.tail
 
 	def expand( self ):
 		"""expand graph by one link in all directions. Return true if done"""
@@ -23,51 +13,48 @@ class JiraWalk:
 		for nodekey in thispass:
 			node = thispass[nodekey]
 			for link in node.links:
-				if( link.key not in self.todo and link.key not in self.done and link.key not in thispass ):
-					self.todo[link.key]=self.j.fetchIssue( link.key )
+				if( self.filter.useLink( link ) ):
+					if( link.inwardKey not in self.todo and link.inwardKey not in self.done and link.inwardKey not in thispass ):
+						self.todo[link.inwardKey] = self.j.fetchIssue( link.inwardKey )
+					elif( link.outwardKey not in self.todo and link.outwardKey not in self.done and link.outwardKey not in thispass ):
+						self.todo[link.outwardKey] = self.j.fetchIssue( link.outwardKey )
 
-				if( link.type == "is blocked by" ):
-					e = self.Edge( link.key, node.key )
-				elif( link.type == "blocking" ):
-					e = self.Edge( node.key, link.key )
-				else:
-					continue
-
-				if( e not in self.edges ):
-					self.edges.append( e )
+					if( link not in self.links ):
+						self.links.append( link )
 
 		self.done.update( thispass )
 		return len(self.todo) == 0
 
 	def __init__(self, apiserver, entryPoints, username, password, filter):
-		self.edges = list()
+		self.links = list()
 
 		self.todo = dict()
 		self.done = dict()
 		self.j = JiraAPI(apiserver, username, password)
+		self.filter = filter
 
 		issues = list()
 		for entryPoint in entryPoints.split(','):
 			if( entryPoint.find('-') != -1 ):
 				i = self.j.fetchIssue(entryPoint)
-				if( filter.useIssue( i ) ):
+				if( self.filter.useIssue( i ) ):
 					issues.append( i )
 			else:
 				for i in self.j.fetchIssuesFromProject(entryPoint):
-					if( filter.useIssue( i ) ):
+					if( self.filter.useIssue( i ) ):
 						issues.append( i )
 
 			for issue in issues:
 				self.todo[issue.key] = issue
 
 		#each execution of this loop will expand
-		#the graph by one edge in all directions
+		#the graph by one link in all directions
 		while( not self.expand() ):
 			pass
 
 		#compact data for API caller and destroy temporaries
-		for nodekey in self.done:
-			del self.done[nodekey].links
+#		for nodekey in self.done:
+#			del self.done[nodekey].links
 		self.nodes = self.done
 		del self.done
 		del self.todo

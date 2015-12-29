@@ -38,32 +38,26 @@ class jiraFilter:
 		return issue.status == 'Resolved' or issue.status == 'Closed'
 
 	def useIssue(self, issue):
+		"""Decide if an issue should be further explored"""
 		return not self.closed( issue )
 
-	def useLink(self,edge):
-		return True
+	def useLink(self,link):
+		"""Decide if a link should be further explored"""
+		linkTypeFilter=["blocks","clones"]
+		return link.outwardType in linkTypeFilter
 
-	def getIssueVisuals(self, issue, edges):
+class jiraDecorator:
+	def closed(self, issue):
+		return issue.status == 'Resolved' or issue.status == 'Closed'
+
+	def getIssueVisuals(self, issue):
 		"""calculate style+color of an issue"""
 
-		blocked = False
-		for edge in j.edges:
-			if( edge.head == issue.key and not self.closed( j.nodes[edge.tail] ) ):
-				blocked = True
-				break
-
-		if( self.closed( issue ) ):
-			color = "lightgray"
-		elif( blocked ):
-			if( "Optional" in issue.labels ):
+		color = "lightgreen"
+		for link in issue.links:
+			if( link.outwardKey == issue.key and not self.closed( j.nodes[link.inwardKey] ) ):
 				color = "orange"
-			else:
-				color = "orangered"
-		else:
-			if( "Optional" in issue.labels ):
-				color = "greenyellow"
-			else:
-				color = "green"
+				break
 
 		#compute issue style
 		style = "\"filled,"
@@ -77,13 +71,17 @@ class jiraFilter:
 		style += "\""
 		return (color,style)
 
+	def getLinkVisuals(self, link, inwardIssue, outwardIssue ):
+		if( link.outwardType == "clones" ):
+			return ('black', 'solid', 'none', 1 )
+		else:
+			return ('black', 'solid', 'forward', 3 )
+
 #get all the data with JiraWalk
 from jirawalk import JiraWalk
 
-filter = jiraFilter()
-
 #start with project or user-selected issue
-j = JiraWalk(args.api, args.entrypoint, args.username, args.password, filter)
+j = JiraWalk(args.api, args.entrypoint, args.username, args.password, jiraFilter() )
 
 #graph the graph with graphviz
 import pydot	
@@ -98,6 +96,7 @@ graph = pydot.Dot(
 
 #add all the issues
 issues = dict()
+decorator = jiraDecorator()
 for issuekey in j.nodes:
 	issue = j.nodes[issuekey]
 
@@ -110,7 +109,7 @@ for issuekey in j.nodes:
 	#escape the quotes for DOT parser
 	nodeText = nodeText.replace("\"","\\\"")
 
-	(fillcolor,style) = filter.getIssueVisuals( issue, j.edges )
+	(fillcolor,style) = decorator.getIssueVisuals( issue )
 
 	issues[issue.key] = pydot.Node(
 		nodeText,
@@ -123,7 +122,10 @@ for issuekey in j.nodes:
 	print issue
 
 #add all the edges
-for edge in j.edges:
-	graph.add_edge( pydot.Edge(issues[edge.tail], issues[edge.head], penwidth="3") )
+for link in j.links:
+	(color,style,dir,width) = decorator.getLinkVisuals( link, j.nodes[link.inwardKey], j.nodes[link.outwardKey] )
+
+	graph.add_edge( pydot.Edge( issues[link.inwardKey], issues[link.outwardKey], penwidth=width, style=style, dir=dir) )
+	print link
 
 graph.write(args.filename, format=args.filetype)
