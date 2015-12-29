@@ -33,19 +33,19 @@ else:
 		args.filetype = "svg"
 	args.filename = args.entrypoint + "." + args.filetype
 
-def closed(status):
-	return status == 'Resolved' or status == 'Closed'
+def closed(node):
+	return node.status == 'Resolved' or node.status == 'Closed'
 
 def getNodeVisuals(node, edges):
 	"""calculate style+color of a node"""
 
 	blocked = False
 	for edge in j.edges:
-		if( edge.head == node.key and not closed( j.nodes[edge.tail].status ) ):
+		if( edge.head == node.key and not closed( j.nodes[edge.tail] ) ):
 			blocked = True
 			break
 
-	if( closed(node.status) ):
+	if( closed(node) ):
 		color = "lightgray"
 	elif( blocked ):
 		if( "Optional" in node.labels ):
@@ -60,7 +60,7 @@ def getNodeVisuals(node, edges):
 
 	#compute node style
 	style = "\"filled,"
-	if( closed( node.status ) ):
+	if( closed( node ) ):
 		style += "solid"
 	else:
 		if( node.assignee == "" ):
