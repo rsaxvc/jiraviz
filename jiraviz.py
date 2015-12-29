@@ -84,6 +84,7 @@ class jiraDecorator:
 		if( link.outwardType == "clones" ):
 			r["dir"] = "none"
 			r["penwidth"] = 1
+			r["constraint"] = "false"
 		else:
 			r["dir"] = "forward"
 			r["penwidth"] = 2
