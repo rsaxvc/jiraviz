@@ -10,16 +10,33 @@ class JiraWalk:
 		thispass = self.todo
 		self.todo = dict()
 
-		for issueKey in thispass:
+		for issueKey in thispass.keys():
 			issue = thispass[issueKey]
-			for link in issue.links:
-				if( self.filter.useLink( link ) ):
-					if( link.inwardKey not in self.todo and link.inwardKey not in self.done and link.inwardKey not in thispass ):
-						self.todo[link.inwardKey] = self.j.fetchIssue( link.inwardKey )
-					elif( link.outwardKey not in self.todo and link.outwardKey not in self.done and link.outwardKey not in thispass ):
-						self.todo[link.outwardKey] = self.j.fetchIssue( link.outwardKey )
+			link_list = issue.links
+			for link in link_list:
+				if( link.inwardKey == issueKey ):
+					otherKey = link.outwardKey
+				else:
+					otherKey = link.inwardKey
 
-					if( link not in self.links ):
+				if( otherKey in self.todo ):
+					otherIssue = self.todo[otherKey]
+				elif( otherKey in self.done ):
+					otherIssue = self.done[otherKey]
+				elif( otherKey in self.skipped ):
+					continue
+				elif( otherKey in thispass ):
+					otherIssue = thispass[otherKey]
+				else:
+					otherIssue = self.j.fetchIssue( otherKey )
+					if( self.filter.useIssue( otherIssue ) ):
+						self.todo[otherKey] = otherIssue
+					else:
+						self.skipped[otherKey] = otherIssue
+						continue
+
+				if( link not in self.links ):
+					if( self.filter.useLink( link ) ):
 						self.links.append( link )
 
 		self.done.update( thispass )
@@ -30,6 +47,7 @@ class JiraWalk:
 
 		self.todo = dict()
 		self.done = dict()
+		self.skipped = dict()
 		self.j = JiraAPI(apiserver, username, password)
 		self.filter = filter
 
@@ -44,8 +62,11 @@ class JiraWalk:
 					if( self.filter.useIssue( i ) ):
 						issues.append( i )
 
-			for issue in issues:
+		for issue in issues:
+			if( self.filter.useIssue( issue ) ):
 				self.todo[issue.key] = issue
+			else:
+				self.skipped[issue.key] = issue
 
 		#each execution of this loop will expand
 		#the graph by one link in all directions
@@ -57,5 +78,6 @@ class JiraWalk:
 #			del self.done[issueKey].links
 		self.issues = self.done
 		del self.done
+		del self.skipped
 		del self.todo
 		del self.j
