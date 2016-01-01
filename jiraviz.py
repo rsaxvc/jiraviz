@@ -57,11 +57,13 @@ class jiraDecorator:
 		r["color"] = "black"
 
 		#compute color - orange if blocked
-		r["fillcolor"] = "lightgreen"
+		r["fillcolor"] = "green"
 		for link in issue.links:
-			if( link.outwardKey == issue.key and not self.closed( j.issues[link.inwardKey] ) and link.outwardType == "blocks" ):
-				r["fillcolor"] = "orange"
-				break
+			if( link.outwardKey == issue.key ):
+				if( link.inwardKey in j.issues and not self.closed( j.issues[link.inwardKey] ) ):
+					if( link.outwardType == "blocks" ):
+						r["fillcolor"] = "orange"
+						break
 
 		#compute issue style
 		style = "\"filled,"
