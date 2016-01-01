@@ -35,7 +35,7 @@ else:
 
 class jiraFilter:
 	def closed(self, issue):
-		return issue.status == 'Resolved' or issue.status == 'Closed'
+		return issue.status == 'Resolved' or issue.status == 'Closed' or issue.status == 'Done'
 
 	def useIssue(self, issue):
 		"""Decide if an issue should be further explored"""
